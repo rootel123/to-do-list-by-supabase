@@ -7,7 +7,7 @@ Deno.serve(async (req) => {
   }
 
   const authHeader = req.headers.get("Authorization")!;
-  const { toDoId } = await req.json();
+  const { toDoId, content } = await req.json();
 
   const supabase = createClient(
     Deno.env.get("SUPABASE_URL") ?? "",
@@ -16,8 +16,6 @@ Deno.serve(async (req) => {
   );
 
   const { data: { user } } = await supabase.auth.getUser();
-
-  // 수정할 Todo 찾기 => isdone update( false => true / true => false) => update todo 응답
 
   const { data: existToDoData } = await supabase.from("to_do_list").select().eq(
     "id",
@@ -37,19 +35,9 @@ Deno.serve(async (req) => {
     );
   }
 
-  await supabase.from("to_do_list").update({
-    isdone: !existToDoData.isdone,
-  }).eq(
-    "id",
-    toDoId,
-  );
-
-  const { data: updatedToDoData } = await supabase.from("to_do_list").select()
-    .eq(
-      "id",
-      toDoId,
-    )
-    .limit(1).single();
+  const { data: updatedToDoData } = await supabase.from("to_do_list").update({
+    content,
+  }).eq("id", toDoId).select().single(); //single을 하지 않았을때는 결과값이 배열에 담겨 나온다. || 했을 경우 객체로 나온다.
 
   return new Response(JSON.stringify(updatedToDoData), {
     headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -40,10 +40,10 @@ const App: FC = () => {
           Hello, {session.user.email}{" "}
           <button onClick={() => supabase.auth.signOut()}>Sign Out</button>
         </div>
-        <CreateToDo />
+        <CreateToDo toDos={toDos} setToDos={setToDos} />
         <ul>
           {toDos?.map((v) => (
-            <ToDoCard key={v.id} todo={v} />
+            <ToDoCard key={v.id} todo={v} toDos={toDos} setToDos={setToDos} />
           ))}
         </ul>
       </div>
